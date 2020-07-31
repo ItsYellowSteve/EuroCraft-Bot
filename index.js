@@ -1,12 +1,34 @@
 const botConfig = require("./botconfig.json")
 
-const Discord = require('discord.js');
+const discord = require('discord.js');
 
-const client = new Discord.Client();
+const client = new discord.Client();
 
 const fs = require('fs');
 
-client.commands = new Discord.Collection();
+const { Console } = require("console");
+
+fs.readdir("./commands/" , (err, files) => {
+
+    if(err) console.log(err);
+
+    var jsFiles = files.filter(f => f.split(".").pop() === "js");
+
+    if(jsFiles.length <= 0) {
+        console.log("No files found");
+        return;
+    }
+
+    jsFiles.forEach((f,i) => {
+
+        var fileGet = require(`./commands/${f}`);
+        console.log(`The file ${f} is loaded`);
+
+    })
+
+});
+
+client.commands = new discord.Collection();
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
 for(const file of commandFiles){
@@ -17,18 +39,25 @@ for(const file of commandFiles){
 
 
 client.once('ready', () => {
-    console.log('Status bot: Online');
+    console.log(`${client.user.username} is online!`);
 });
 
 client.on('message', message =>{
     if(!message.content.startsWith(prefix) || message.author.bot) return;
 
-    const args = message.content.slice(prefix.length).split(/ +/);
-    const command = args.shift().toLowerCase();
+    const arguments = messageArray(1);
 
-    if(command === 'ping'){
+    const command = messageArray[0];
+
+    var prefix = botConfig.prefix;
+    
+    var messageArray = message.content.split(" ");
+
+    if(command === `${prefix}ping`){
         client.commands.get('ping').execute(message, args);
+    } else if(command === `${prefix}info`){
+        client.commands.get('info').execute(message, args);
     }
 })
 
-client.login(process.env.token);
+client.login(botConfig.token);
