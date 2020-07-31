@@ -4,9 +4,13 @@ const discord = require('discord.js');
 
 const client = new discord.Client();
 
+const bot = new discord.Client();
+bot.commands = new discord.Collection();
+
 const fs = require('fs');
 
 const { Console } = require("console");
+
 
 fs.readdir("./commands/" , (err, files) => {
 
@@ -23,18 +27,20 @@ fs.readdir("./commands/" , (err, files) => {
 
         var fileGet = require(`./commands/${f}`);
         console.log(`The file ${f} is loaded`);
+        
+        bot.commands.set(fileGet.help.name, fileGet);
 
     })
 
 });
 
-client.commands = new discord.Collection();
+
 
 const commandFiles = fs.readdirSync('./commands/').filter(file => file.endsWith('.js'));
 for(const file of commandFiles){
     const command = require(`./commands/${file}`);
 
-    client.commands.set(command.name, command);
+    bot.commands.set(command.name, command);
 }
 
 
@@ -52,6 +58,11 @@ client.on('message', message =>{
     var prefix = botConfig.prefix;
     
     var messageArray = message.content.split(" ");
+
+
+    var commands = bot.commands.get(command.slice(prefix.length));
+
+    if(commands) command.run(client,message,args)
 
     if(command === `${prefix}ping`){
         client.commands.get('ping').execute(message, args);
