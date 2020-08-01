@@ -28,7 +28,7 @@ fs.readdir("./commands/" , (err, files) => {
         var fileGet = require(`./commands/${f}`);
         console.log(`The file ${f} is loaded`);
         
-        bot.commands.set(fileGet.help.name, fileGet);
+        bot.commands.set(fileGet.help, fileGet);
 
     })
 
@@ -51,7 +51,7 @@ client.once('ready', () => {
 client.on('message', message =>{
     if(!message.content.startsWith(prefix) || message.author.bot) return;
 
-    const arguments = messageArray(1);
+    const args = messageArray(1);
 
     const command = messageArray[0];
 
@@ -62,7 +62,7 @@ client.on('message', message =>{
 
     var commands = bot.commands.get(command.slice(prefix.length));
 
-    if(commands) command.run(client,message,args)
+    if(commands) commands.run(bot,message,args)
 
     if(command === `${prefix}ping`){
         client.commands.get('ping').execute(message, args);
